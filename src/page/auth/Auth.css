@@ -1,0 +1,16 @@
+.authContainer {
+    /*background-image: url("../../assets/images/coin-8839127_1920.jpg");*/
+    background-image: url("https://cdn.pixabay.com/photo/2024/06/19/05/00/coin-8839127_1280.jpg");
+    height:100vh;
+    width:100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    /*position: fixed;*/
+
+}
+.nbgBlure {
+    /*background: rgba(0, 0, 0, 0.5); */
+    backdrop-filter: blur(10px);
+
+}
