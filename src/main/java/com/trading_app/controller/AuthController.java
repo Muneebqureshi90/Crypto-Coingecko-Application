@@ -21,7 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -45,6 +47,8 @@ public class AuthController {
 
     @Autowired
     private VerificationCodeService verificationCodeService;
+    @Autowired
+    private ImageService imageService;
 
     @Autowired
     private EmailService emailService;
@@ -58,7 +62,7 @@ public class AuthController {
     private WatchlistService watchlistService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> registerUser(@RequestBody User user) throws Exception {
+    public ResponseEntity<AuthResponse> registerUser(@RequestParam("file") MultipartFile file, @RequestBody User user) throws Exception {
 
 
         User isExistByEmail = userRepository.findByEmail(user.getEmail());
@@ -72,6 +76,20 @@ public class AuthController {
         newUser.setFullName(user.getFullName());
 
         User savedUser = userRepository.save(newUser);
+
+        // Upload image and link to user
+        if (file != null && !file.isEmpty()) {
+            // Upload the user-provided image
+            String fileName = imageService.uploadImage(file);
+            userService.updateUserProfileImage(savedUser.getId(), fileName);
+        } else {
+            // Assign a default image if none is uploaded
+            String defaultImagePath = "images/default_image.jpeg"; // Specify your default image path here
+            userService.updateUserProfileImage(savedUser.getId(), defaultImagePath);
+        }
+
+
+
         watchlistService.createWatchlist(savedUser);
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 user.getEmail(),
@@ -87,6 +105,50 @@ public class AuthController {
 
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
+
+    @PostMapping("/user/{userId}/upload-image")
+    public ResponseEntity<String> uploadUserImage(@PathVariable long userId, @RequestParam("file") MultipartFile file) {
+        try {
+            String fileName = imageService.uploadImage(file);
+            userService.updateUserProfileImage(userId, fileName);
+            return ResponseEntity.status(HttpStatus.OK).body("Image uploaded successfully");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not upload image: " + e.getMessage());
+        }
+    }
+    @GetMapping("/user/{userId}/image")
+    public ResponseEntity<byte[]> getUserImage(@PathVariable Long userId) {
+        try {
+            String imagePath = userService.getUserProfileImage(userId);
+            byte[] imageBytes = imageService.getImage(imagePath);
+
+            // Determine content type based on file extension
+            String contentType = getContentType(imagePath);
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", contentType) // Adjust content type based on your image type
+                    .body(imageBytes);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Image not found".getBytes()); // Respond with NOT_FOUND if the image isn't found
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    private String getContentType(String imagePath) {
+        if (imagePath.endsWith(".png")) {
+            return "image/png";
+        } else if (imagePath.endsWith(".jpg") || imagePath.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (imagePath.endsWith(".gif")) {
+            return "image/gif";
+        } else {
+            return "application/octet-stream"; // Default content type
+        }
+    }
+
+
 
     @PostMapping("/signin")
     public ResponseEntity<AuthResponse> login(@RequestBody User user) throws Exception {

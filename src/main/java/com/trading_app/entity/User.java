@@ -20,6 +20,8 @@ public class User {
     private String city;
     private String postalCode;
     private String country;
+    private String profileImage;
+
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

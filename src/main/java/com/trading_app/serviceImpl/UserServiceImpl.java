@@ -16,7 +16,17 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Override
+    public void updateUserProfileImage(long userId, String imagePath) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setProfileImage(imagePath);
+        userRepository.save(user);
+    }
+    @Override
+    public String getUserProfileImage(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getProfileImage();
+    }
     @Override
     public User findUserProfileByJwt(String jwt) throws Exception {
         String email = JwtProvider.getEmailFromToken(jwt);
