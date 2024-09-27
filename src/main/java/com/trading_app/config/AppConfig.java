@@ -86,17 +86,44 @@ public class AppConfig {
     }
 
 
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        CorsConfiguration config = new CorsConfiguration();
+//
+//        config.setAllowCredentials(true);
+//        config.setAllowedOrigins(Arrays.asList(  "http://192.168.18.57:19006",
+//                "http://localhost:19006",
+//                "http://192.168.18.57:8081",
+//                "http://localhost:8081",
+//                "http://localhost:3000",
+//
+//                "http://localhost:5173", "/**", "http://localhost:5174"));
+//        config.addAllowedHeader("*");
+//        config.addAllowedMethod("*");
+//        source.registerCorsConfiguration("/**", config);
+//        return source;
+//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "/**", "http://localhost:5174"));
+        config.setAllowedOrigins(Arrays.asList(
+                "http://192.168.18.57:19006",
+                "http://localhost:19006",
+                "http://192.168.18.57:8081",
+                "http://localhost:8081",
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:5174"
+        ));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
 }
