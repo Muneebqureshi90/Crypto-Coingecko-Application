@@ -21,6 +21,7 @@ public class ImageServiceImpl implements ImageService {
             directory.mkdirs();
         }
 
+
         // Create a unique file name and save the image
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         File serverFile = new File(directory, fileName);

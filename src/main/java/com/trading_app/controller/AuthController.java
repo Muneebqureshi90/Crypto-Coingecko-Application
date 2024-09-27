@@ -62,7 +62,7 @@ public class AuthController {
     private WatchlistService watchlistService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> registerUser(@RequestParam("file") MultipartFile file, @RequestBody User user) throws Exception {
+    public ResponseEntity<AuthResponse> registerUser( @RequestBody User user) throws Exception {
 
 
         User isExistByEmail = userRepository.findByEmail(user.getEmail());
@@ -74,21 +74,16 @@ public class AuthController {
         newUser.setPassword(user.getPassword());
         newUser.setEmail(user.getEmail());
         newUser.setFullName(user.getFullName());
+        newUser.setPostalCode(user.getPostalCode());
+        newUser.setCity(user.getCity());
+        newUser.setAddress(user.getAddress());
+        newUser.setCountry(user.getCountry());
+        newUser.setNationality(user.getNationality());
+        newUser.setDateOfBirth(user.getDateOfBirth());
 
+        String defaultImagePath = "default.jpeg";
+        newUser.setProfileImage(defaultImagePath);
         User savedUser = userRepository.save(newUser);
-
-        // Upload image and link to user
-        if (file != null && !file.isEmpty()) {
-            // Upload the user-provided image
-            String fileName = imageService.uploadImage(file);
-            userService.updateUserProfileImage(savedUser.getId(), fileName);
-        } else {
-            // Assign a default image if none is uploaded
-            String defaultImagePath = "images/default_image.jpeg"; // Specify your default image path here
-            userService.updateUserProfileImage(savedUser.getId(), defaultImagePath);
-        }
-
-
 
         watchlistService.createWatchlist(savedUser);
         Authentication auth = new UsernamePasswordAuthenticationToken(
@@ -102,6 +97,7 @@ public class AuthController {
         res.setJwt(jwt);
         res.setStatus(true);
         res.setMessage("Register Success");
+        res.setUserId(String.valueOf(savedUser.getId())); // Convert long to String
 
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
